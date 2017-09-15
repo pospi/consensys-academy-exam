@@ -174,7 +174,5 @@ contract TollBoothOperatorI {
      *         - one `bool` parameter, the initial paused state.
      *         - one `uint` parameter, the initial deposit wei value, which cannot be 0.
      *         - one `address` parameter, the initial regulator, which cannot be 0.
-     */        
-
-    // TODO refund vehicles fully when problem on the road
+     */
 }

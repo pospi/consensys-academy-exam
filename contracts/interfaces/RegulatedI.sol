@@ -41,6 +41,4 @@ contract RegulatedI {
      *     - is a `RegulatedI`.
      *     - has a constructor that takes one `address` parameter, the initial regulator, which cannot be 0.
      */
-
-     // TODO? Ensure that regulator has proper interface.
 }
