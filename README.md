@@ -171,8 +171,8 @@ It extends:
 
 and has:
 
-* a modifier named `whenPaused` that rolls back the transaction if the contract is in the `true` paused state.
-* a modifier named `whenNotPaused` that rolls back the transaction if the contract is in the `false` paused state
+* a modifier named `whenPaused` that rolls back the transaction if the contract is in the `false` paused state.
+* a modifier named `whenNotPaused` that rolls back the transaction if the contract is in the `true` paused state
 * a constructor that takes one `bool` parameter, the initial paused state.
 
 ### `Regulator`

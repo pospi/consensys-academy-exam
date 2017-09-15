@@ -7,6 +7,7 @@ const allArtifacts = {
     Regulator: artifacts.require("./Regulator.sol"),
     DepositHolder: artifacts.require("./DepositHolder.sol"),
     MultiplierHolder: artifacts.require("./MultiplierHolder.sol"),
+    RoutePriceHolder: artifacts.require("./RoutePriceHolder.sol"),
     TollBoothHolder: artifacts.require("./TollBoothHolder.sol"),
     TollBoothOperator: artifacts.require("./TollBoothOperator.sol")
 }
@@ -17,6 +18,7 @@ const constructors = {
     Regulator: owner => allArtifacts.Regulator.new(false, { from: owner }),
     DepositHolder: owner => allArtifacts.DepositHolder.new(105, { from: owner }),
     MultiplierHolder: owner => allArtifacts.MultiplierHolder.new({ from: owner }),
+    RoutePriceHolder: owner => allArtifacts.RoutePriceHolder.new({ from: owner }),
     TollBoothHolder: owner => allArtifacts.TollBoothHolder.new({ from: owner }),
     TollBoothOperator: owner => allArtifacts.TollBoothOperator.new(false, 105, owner, { from: owner })
 };
