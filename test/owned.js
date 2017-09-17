@@ -7,7 +7,7 @@ const allArtifacts = {
     Regulator: artifacts.require("./Regulator.sol"),
     DepositHolder: artifacts.require("./DepositHolder.sol"),
     MultiplierHolder: artifacts.require("./MultiplierHolder.sol"),
-    RoutePriceHolder: artifacts.require("./RoutePriceHolder.sol"),
+    RoutePriceHolder: artifacts.require("./RoutePriceHolderMock.sol"),
     TollBoothHolder: artifacts.require("./TollBoothHolder.sol"),
     TollBoothOperator: artifacts.require("./TollBoothOperator.sol")
 }

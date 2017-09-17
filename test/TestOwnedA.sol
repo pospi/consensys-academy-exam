@@ -8,12 +8,10 @@ import "../contracts/Regulator.sol";
 import "../contracts/DepositHolder.sol";
 import "../contracts/MultiplierHolder.sol";
 import "../contracts/TollBoothHolder.sol";
-import "../contracts/mock/RoutePriceHolderMock.sol";
-import "../contracts/TollBoothOperator.sol";
 
-contract TestOwned {
+contract TestOwnedA {
 
-    uint instanceCount = 8;
+    uint instanceCount = 6;
 
     function createInstance(uint index) private returns(OwnedI) {
         if (index == 0) {
@@ -28,10 +26,6 @@ contract TestOwned {
             return new MultiplierHolder();
         } else if (index == 5) {
             return new TollBoothHolder();
-        } else if (index == 6) {
-            return new RoutePriceHolderMock();
-        } else if (index == 7) {
-            return new TollBoothOperator(true, 1, this);
         } else {
             revert();
         }
