@@ -131,9 +131,9 @@ For a vehicle to be accepted on the road system and the operator to be paid at t
 * if the fee is smaller than the deposit, then the difference is returned to the vehicle.
 * if the fee is not known at the time of exit, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
 * when the oracle receives a new base route price request, it submits the base fee, which also clears one pending payment.
-* if there are more than 1 pending payments, an additional function is there to progressively clear the backlog one pending payment at a time.
+* if there are more than 1 pending payments, an additional function is there to progressively clear the backlog a set number of pending payments at a time.
 
-For simplicity's sake, we have not implemented a deadline after which the deposit is returned to the vehicle.
+For simplicity's sake, we have not implemented a deadline after which the deposit is returned to the vehicle. Also, the function to clear pending more than 1 payment is an ugly one, because it implies a loop and multiple transfers. We actually use it to see how many pending payments you can cram in a single transaction.
 
 ## Contract overview
 
