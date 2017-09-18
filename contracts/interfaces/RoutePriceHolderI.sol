@@ -22,7 +22,8 @@ contract RoutePriceHolderI {
      *     It should roll back if entry and exit booths are the same.
      *     It should roll back if either booth is zero.
      *     It should roll back if there is no change in price.
-     *     If relevant it will release 1 pending payment for this route.
+     *     If relevant, and only when part of TollBoothOperatorI, it will release 1 pending payment
+     *       for this route.
      *     It should not roll back if the relevant pending payment is not solvable, if, for
      *       instance the vehicle has had wrongly set values in the interim.
      *     It should be possible to call it even when the contract is in the `true` paused state.
