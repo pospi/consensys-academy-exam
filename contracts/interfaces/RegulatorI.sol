@@ -27,8 +27,9 @@ contract RegulatorI {
 
     /**
      * Called by the owner of the regulator to register a new vehicle with its VehicleType.
-     *     It should not be possible to change it if no change will be effected.
-     *     It should not be possible to pass a 0x vehicle address.
+     *     It should roll back if the caller is not the owner of the contract.
+     *     It should roll back if the arguments mean no change of state.
+     *     It should roll back if a 0x vehicle address is passed.
      * @param vehicle The address of the vehicle being registered. This may be an externally
      *   owned account or a contract. The regulator does not care.
      * @param vehicleType The VehicleType of the vehicle being registered.
@@ -65,8 +66,9 @@ contract RegulatorI {
 
     /**
      * Called by the owner of the regulator to deploy a new TollBoothOperator onto the network.
+     *     It should roll back if the caller is not the owner of the contract.
      *     It should start the TollBoothOperator in the `true` paused state.
-     *     It should not accept as rightful owner the current owner of the regulator.
+     *     It should roll back if the rightful owner argument is the current owner of the regulator.
      * @param owner The rightful owner of the newly deployed TollBoothOperator.
      * @param deposit The initial value of the TollBoothOperator deposit.
      * @return The address of the newly deployed TollBoothOperator.
@@ -90,7 +92,8 @@ contract RegulatorI {
     /**
      * Called by the owner of the regulator to remove a previously deployed TollBoothOperator from
      * the list of approved operators.
-     *     It should not accept if the operator is unknown.
+     *     It should roll back if the caller is not the owner of the contract.
+     *     It should roll back if the operator is unknown.
      * @param operator The address of the contract to remove.
      * @return Whether the action was successful.
      * Emits LogTollBoothOperatorRemoved.

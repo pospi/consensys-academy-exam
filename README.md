@@ -1,12 +1,17 @@
 # Step 2
 
+## Intro
+
 You will complete this Truffle project.
 
 * Your code has to compile, test and be served from within the preconfigured Vagrant box we have made available to your cohort's group on [Academy Git](https://git.academy.b9lab.com). You should also have received an email telling you about it. Do not run any version update on this box.
-* You need to upload it to your [Academy Git](https://git.academy.b9lab.com) exam repository, to which you should have received an email invitation.
+* You need to upload your project to the [Academy Git](https://git.academy.b9lab.com) exam repository named after you, to which you should have received an email invitation.
+* You can make as many commits and pushes as you see fit.
 * To assist you with configuring your computer to access the repository, please follow [Gitlab's official documentation](https://docs.gitlab.com/ce/ssh/README.html).
 
-Our road system will be represent by 2 overarching smart contracts:
+### Project intro
+
+Our project describes a road system that will be represent by 2 overarching smart contracts:
 
 * `Regulator`
 * `TollBoothOperator`
@@ -33,16 +38,19 @@ There variables will be used thus:
 
 ## External accounts
 
-There are a certain number of off-chain actions, such as proof of identity or secret exchange, that we will address only with a wave of the hand in this project. Smart contract should make it possible though via public functions.
+There are a certain number of off-chain actions, such as proof of identity or secret exchange, that we will address only with a wave of the hand in this project. Smart contracts should make these actions possible via public functions, though.
 
 ### Vehicles
 
+We only care about vehicles, not about drivers. It means it can be driven by the vehicle's rightful owner, another driver, or no human driver at all.
+
+* Only vehicles registered with the regulator are allowed to enter the road system.
 * Before entering the road system, registered vehicles must make a deposit of at least the amount required by the operator for their vehicle type.
-* When exiting the exit toll booth will trigger the payment off the deposit and refund the difference to the vehicle.
+* Upon exit, the exit toll booth will trigger the payment off the deposit and refund the difference to the vehicle.
 
 * This deposit must be accompanied by the address of the toll booth by which they will enter.
 * When exiting the road system, the vehicle gives, off-chain, a secret to the exit toll booth.
-* The exit toll booth uses this secret to unlock the deposit, then pay the road operator the proper fee for the route taken, then refunds the difference to the vehicle.
+* The exit toll booth sends this secret to the road operator contract, which is used to unlock the deposit, then pay the road operator the proper fee for the route taken, then refunds the difference to the vehicle.
 
 The off-chain exchange of the secret is handled by a wave of the hand in this project. You are not asked to work on this massive "detail".
 
@@ -57,7 +65,7 @@ Here too, you need not work on the off-chain exchange of address of the incoming
 
 This account will:
 
-* update the vehicle types in the smart contract
+* update the vehicle types in the smart contract.
 * ask the smart contract to deploy new `TollBoothOperator`s.
 * inform whether an address is a registered `TollBoothOperator`.
 * unregister `ToolBoothOperator`s when needed.
@@ -92,13 +100,13 @@ This ensures that:
 
 Additionally:
 
-* the regulator collect no fees.
+* the regulator collects no fees.
 * a type of `0` denotes an unregistered vehicle.
-* for mnemonics, you can assign type `1` for motorbikes, `2` for cars and `3` for lorries.
+* for mnemonics only, you can assign type `1` for motorbikes, `2` for cars and `3` for lorries.
 
 ### `TollBoothOperator`
 
-This contract has many functions which have been parcelled out to its inheritance tree. The things it does:
+This contract has many functions which have been parcelled out to its inheritance tree, see its interfaces. The things it does:
 
 * can be paused / resumed to pause the vehicle-facing operations.
 * keeps track of the regulator.
@@ -108,7 +116,7 @@ This contract has many functions which have been parcelled out to its inheritanc
 * keeps track of the route base prices.
 * accepts deposits from vehicles.
 * accepts exit calls from toll booths.
-* accepts messages to clear exit backlog.
+* accepts messages to clear the exit backlog.
 
 For simplicity's sake:
 
@@ -126,12 +134,12 @@ For a vehicle to be accepted on the road system and the operator to be paid at t
 * before entering the system, the vehicle deposits the required amount into the `TollBoothOperator`, and passes along the address of the entry booth and a unique hashed secret of its own choice. The vehicle keeps the secret until the end of the trip.
 * when faced with the toll booth it mentioned when depositing, it proves its identity off-chain (we talk about this identity proof but you need not implement it), after which the booth opens the gate.
 * when exiting the road system at a booth, the vehicle gives the exit toll booth its unhashed secret off-chain. Again, we talk about this off-chain exchange but you do not need to implement it.
-* the exit toll booth then submits this secret to the `TollBoothOperator`, which unlocks the deposit for payment and refund of the difference.
-* if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle.
+* the exit toll booth then submits this secret to the `TollBoothOperator`, which unlocks the deposit for payment and refund of the difference, if applicable.
+* if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
 * if the fee is smaller than the deposit, then the difference is returned to the vehicle.
 * if the fee is not known at the time of exit, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
 * when the oracle receives a new base route price request, it submits the base fee, which also clears one pending payment.
-* if there are more than 1 pending payments, an additional function is there to progressively clear the backlog a set number of pending payments at a time in a FIFO manner.
+* if there are more than 1 pending payments, an additional function is there to progressively clear the backlog a set number of pending payments at a time in a FIFO (of the exit) manner.
 
 For simplicity's sake, we have not implemented a deadline after which the deposit is returned to the vehicle. Also, the function to clear pending more than 1 payment is an ugly one, because it implies a loop and multiple transfers. We actually use it to see how many pending payments you can cram in a single transaction.
 
@@ -151,6 +159,8 @@ All interfaces are found in the `contracts/interfaces/` folder and are suffixed 
 
 The contracts you need to create in their individual files in the `contracts/` folder are as follows. Note that we will use your implementations against our battery of Truffle unit tests. You can see a sample of them in the test folder. So it is important that you stick to the naming and the parameters order.
 
+When we say that `One` inherits from `OneI` and `Two` inherits from both `OneI` and `TwoI`, we leave it to your best judgement as to how to use `One` when coding `Two`. Remember that inheritance is transitive.
+
 ### `Owned`
 
 It extends:
@@ -159,8 +169,8 @@ It extends:
 
 and has:
 
-* has a modifier named `fromOwner` that rolls back the transaction if the transaction sender is not the owner.
-* has a constructor that takes no parameter.
+* a modifier named `fromOwner` that rolls back the transaction if the transaction sender is not the owner.
+* a constructor that takes no parameter.
 
 ### `Pausable`
 
@@ -194,7 +204,7 @@ It extends:
 
 and has:
 
-* a constructor that takes one `address` parameter, the initial regulator, which cannot be `0`.
+* a constructor that takes one `address` parameter, the initial regulator; it should roll back the transaction if the regulator argument is `0`.
 
 ### `MultiplierHolder`
 
@@ -216,7 +226,7 @@ It extends:
 
 and has:
 
-* a constructor that takes one `uint` parameter, the initial deposit wei value, which cannot be `0`
+* a constructor that takes one `uint` parameter, the initial deposit wei value; it should roll back the transaction if the deposit argument is `0`.
 
 ### `TollBoothHolder`
 
@@ -258,8 +268,8 @@ and has:
 
 * a constructor that takes in this order:
   * one `bool` parameter, the initial paused state.
-  * one `uint` parameter, the initial deposit wei value, which cannot be 0.
-  * one `address` parameter, the initial regulator, which cannot be 0.
+  * one `uint` parameter, the initial deposit wei value; it should roll back the transaction if the deposit argument is `0`.
+  * one `address` parameter, the initial regulator; it should roll back the transaction if the regulator argument is `0`.
 * a fallback function that rejects all incoming calls.
 
 ## Migrations
@@ -272,7 +282,12 @@ You need to create one migration script `2_...js` that will:
 
 ## Tests
 
-You may create as many tests as you want but we still want you to create tests for the following scenarios:
+A quick note on wording:
+
+* "a / the deposit" refers to the value that the contract requires from entering vehicles.
+* "what is deposited" means what was actually sent by the vehicle upon entering.
+
+You may create as many tests as you want but we still want you to create tests for the following scenarios. 
 
 * Scenario 1:
   * `vehicle1` enters at `booth1` and deposits required amount.
@@ -311,7 +326,7 @@ We will run your tests against our hopefully-correct implementations, for which 
 
 We want you to create a simple UI with 4 pages. You do not need to make it look fancy. But it has to be functional. It is ok if it requires copy / paste of addresses and secrets from the human user.
 
-You can use the framework of your choice, and it is good manner to add some instructions on how to make it run within the VM.
+You can use the framework of your choice, and it is good manner to add some instructions on how to make it run within the VM. If there is any NodeJs package that you would like to use make sure they appear in `package.json` and you committed it too.
 
 So:
 
@@ -335,7 +350,7 @@ So:
   * no need to see its pending payments.
 * a page for individual toll booths, which allows it to:
   * report a vehicle exit.
-  * be informed on the status of the refund or of the pending payment.
+  * be informed on the status of the refund or of the pending payment of the vehicle reported above.
   * no need to see its history of entry / exit.
 
 ## You code!

@@ -10,8 +10,8 @@ contract PausableI {
 
     /**
      * Sets the new paused state for this contract.
-     *   - only the current owner of this contract can call this function.
-     *   - only a state different from the current one can be passed.
+     *     It should roll back if the caller is not the current owner of this contract.
+     *     It should roll back if the state passed is no different from the current.
      * @param newState The new desired "paused" state of the contract.
      * @return Whether the action was successful.
      * Emits LogPausedSet.

@@ -13,9 +13,11 @@ contract TollBoothHolderI {
 
     /**
      * Called by the owner of the TollBoothOperator.
-     *     It should not accept to add the same tollbooth again.
-     *     It should not accept a 0x address for toll booth.
-     *     It should be possible to add toll booth even when the contract is paused.
+     *     It should roll back if the caller is not the owner of the contract.
+     *     It should roll back if the argument is already a toll booth.
+     *     It should roll back if the argument is a 0x address.
+     *     When part of TollBoothOperatorI, it should be possible to add toll booths even when
+     *       the contract is paused.
      * @param tollBooth The address of the toll booth being added.
      * @return Whether the action was successful.
      * Emits LogTollBoothAdded
@@ -44,9 +46,11 @@ contract TollBoothHolderI {
 
     /**
      * Called by the owner of the TollBoothOperator.
-     *     It should not accept to remove the same tollbooth again.
-     *     It should not accept a 0x address for toll booth.
-     *     It should be possible to remove toll booth even when the contract is paused.
+     *     It should roll back if the caller is not the owner of the contract.
+     *     It should roll back if the argument has already been removed.
+     *     It should roll back if the argument is a 0x address.
+     *     When part of TollBoothOperatorI, it should be possible to remove toll booth even when
+     *       the contract is paused.
      * @param tollBooth The toll booth to remove.
      * @return Whether the action was successful.
      * Emits LogTollBoothRemoved

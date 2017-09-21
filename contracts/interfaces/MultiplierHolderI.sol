@@ -17,7 +17,7 @@ contract MultiplierHolderI {
      * Called by the owner of the TollBoothOperator.
      *   Can be used to update a value.
      *   It should roll back if the vehicle type is 0.
-     *   Setting the multiplier to 0 is equivalent to removing it.
+     *   Setting the multiplier to 0 is equivalent to removing it and is acceptable.
      *   It should roll back if the same multiplier is already set to the vehicle type.
      * @param vehicleType The type of the vehicle being set.
      * @param multiplier The multiplier to use.
