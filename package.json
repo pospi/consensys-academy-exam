@@ -6,14 +6,14 @@
     "lint:js": "eslint ./app",
     "lint:soli": "solium --dir contracts/",
     "lint:solc": "solcheck contracts/*",
-    "lint:sol": "npm-run-all --parallel lint:soli lint:solc",
+    "lint:sol": "npm-run-all lint:soli lint:solc",
     "lint": "npm-run-all lint:sol lint:js",
-    "lint:watch": "nodemon --watch contracts --exec node_modules/.bin/npm-run-all lint:sol",
     "build": "webpack",
     "dev": "webpack-dev-server",
     "test:blockchain": "testrpc",
     "test:contracts": "truffle test",
-    "test": "npm-run-all --parallel test:contracts test:blockchain",
+    "test": "npm-run-all test:contracts",
+    "test:watch": "npm-run-all --parallel test:blockchain 'watch test'",
     "watch": "npm-watch"
   },
   "watch": {
