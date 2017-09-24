@@ -3,9 +3,43 @@
   "version": "0.0.2",
   "description": "Frontend example using truffle v3",
   "scripts": {
-    "lint": "eslint ./",
+    "lint:js": "eslint ./app",
+    "lint:soli": "solium --dir contracts/",
+    "lint:solc": "solcheck contracts/*",
+    "lint:sol": "npm-run-all --parallel lint:soli lint:solc",
+    "lint": "npm-run-all lint:sol lint:js",
+    "lint:watch": "nodemon --watch contracts --exec node_modules/.bin/npm-run-all lint:sol",
     "build": "webpack",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "test:blockchain": "testrpc",
+    "test:contracts": "truffle test",
+    "test": "npm-run-all --parallel test:contracts test:blockchain",
+    "watch": "npm-watch"
+  },
+  "watch": {
+    "test": {
+      "patterns": [
+        "truffle",
+        "test",
+        "contracts"
+      ],
+      "extensions": "js,json,sol"
+    },
+    "lint:sol": {
+      "patterns": [
+        "test",
+        "contracts"
+      ],
+      "extensions": "sol"
+    },
+    "lint": {
+      "patterns": [
+        "test",
+        "app",
+        "contracts"
+      ],
+      "extensions": "js,jsx,ts,tsx,json,sol"
+    }
   },
   "author": "Douglas von Kohorn",
   "license": "MIT",
@@ -26,8 +60,12 @@
     "eslint-plugin-mocha": "^4.8.0",
     "eslint-plugin-promise": "^3.0.0",
     "eslint-plugin-standard": "^2.0.0",
+    "ethereumjs-testrpc": "^4.1.3",
     "html-webpack-plugin": "^2.28.0",
     "json-loader": "^0.5.4",
+    "npm-watch": "^0.2.0",
+    "solcheck": "^0.1.3",
+    "solium": "^0.5.5",
     "style-loader": "^0.13.1",
     "truffle-contract": "^1.1.11",
     "web3": "^0.18.2",
@@ -36,6 +74,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "truffle": "^3.4.7"
+    "npm-run-all": "^4.1.1",
+    "truffle": "3.4.9"
   }
 }
