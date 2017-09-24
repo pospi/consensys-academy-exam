@@ -10,7 +10,7 @@
     "lint": "npm-run-all lint:sol lint:js",
     "build": "webpack",
     "dev": "webpack-dev-server",
-    "test:blockchain": "testrpc",
+    "test:blockchain": "testrpc > /dev/null 2>&1",
     "test:contracts": "truffle test",
     "test": "npm-run-all test:contracts",
     "test:watch": "npm-run-all --parallel test:blockchain 'watch test'",
