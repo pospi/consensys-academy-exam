@@ -37,6 +37,7 @@ contract Pausable is PausableI, Owned {
      * Emits LogPausedSet.
      */
     function setPaused(bool newState) fromOwner() public returns(bool success) {
+    		require(newState != paused);
         paused = newState;
         LogPausedSet(msg.sender, newState);
         return true;
