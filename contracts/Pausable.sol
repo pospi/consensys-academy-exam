@@ -17,7 +17,7 @@ contract Pausable is PausableI, Owned {
         _;
     }
 
-    function Pausable(bool isPaused) {
+    function Pausable(bool isPaused) Owned() {
         paused = isPaused;
     }
 
