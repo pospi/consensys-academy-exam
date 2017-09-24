@@ -266,6 +266,8 @@ contract('MultiplierHolder', function(accounts) {
 
             });
 
+          if (!process.env.SKIP_SLOW_STUFF) {
+
             describe("stress test", function() {
 
                 const count = 500;
@@ -290,7 +292,7 @@ contract('MultiplierHolder', function(accounts) {
                         })))
                         .then(multipliers => {
                             assert.strictEqual(multipliers.length, count);
-                            multipliers.forEach((multiplier, index) => 
+                            multipliers.forEach((multiplier, index) =>
                                 assert.strictEqual(multiplier.toNumber(), 2 * (index + 1)));
                         })
                         .then(() => Promise.allSeq(unsetting))
@@ -300,7 +302,7 @@ contract('MultiplierHolder', function(accounts) {
                         })))
                         .then(multipliers => {
                             assert.strictEqual(multipliers.length, count);
-                            multipliers.forEach(multiplier => 
+                            multipliers.forEach(multiplier =>
                                 assert.strictEqual(multiplier.toNumber(), 0));
                         });
 
@@ -308,10 +310,12 @@ contract('MultiplierHolder', function(accounts) {
 
             });
 
+          }
+
         });
 
     });
- 
+
     it("should have correct number of functions", function() {
         return constructors.MultiplierHolder(owner0, false)
             .then(holder => assert.strictEqual(Object.keys(holder).length, 14));
