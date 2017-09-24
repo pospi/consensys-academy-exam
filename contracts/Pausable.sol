@@ -36,7 +36,7 @@ contract Pausable is PausableI, Owned {
      * @return Whether the action was successful.
      * Emits LogPausedSet.
      */
-    function setPaused(bool newState) returns(bool success) {
+    function setPaused(bool newState) fromOwner() public returns(bool success) {
         paused = newState;
         LogPausedSet(msg.sender, newState);
         return true;
@@ -45,7 +45,7 @@ contract Pausable is PausableI, Owned {
     /**
      * @return Whether the contract is indeed paused.
      */
-    function isPaused() constant returns(bool isIndeed) {
+    function isPaused() constant public returns(bool isIndeed) {
         return paused;
     }
 }

@@ -35,7 +35,7 @@ contract Owned is OwnedI {
      * @return Whether the action was successful.
      * Emits LogOwnerSet.
      */
-    function setOwner(address newOwner) fromOwner() returns(bool success) {
+    function setOwner(address newOwner) fromOwner() public returns(bool success) {
         require(newOwner != 0);
         require(newOwner != owner);
 
