@@ -1,4 +1,5 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
+
 
 contract TollBoothOperatorI {
 
@@ -32,7 +33,7 @@ contract TollBoothOperatorI {
      *     It should roll back when the contract is in the `true` paused state.
      *     It should roll back if `entryBooth` is not a tollBooth.
      *     It should roll back if less than deposit * multiplier was sent alongside.
-     *     It should be possible for a vehicle to enter "again" before it has exited from the 
+     *     It should be possible for a vehicle to enter "again" before it has exited from the
      *       previous entry.
      * @param entryBooth The declared entry booth by which the vehicle will enter the system.
      * @param exitSecretHashed A hashed secret that when solved allows the operator to pay itself.
@@ -41,8 +42,8 @@ contract TollBoothOperatorI {
      * Emits LogRoadEntered.
      */
     function enterRoad(
-            address entryBooth,
-            bytes32 exitSecretHashed)
+        address entryBooth,
+        bytes32 exitSecretHashed)
         public
         payable
         returns (bool success);
@@ -62,7 +63,8 @@ contract TollBoothOperatorI {
         returns(
             address vehicle,
             address entryBooth,
-            uint depositedWeis);
+            uint depositedWeis
+        );
 
     /**
      * Event emitted when a vehicle exits a road system.
@@ -129,9 +131,10 @@ contract TollBoothOperatorI {
      * Emits LogRoadExited as many times as count.
      */
     function clearSomePendingPayments(
-            address entryBooth,
-            address exitBooth,
-            uint count)
+        address entryBooth,
+        address exitBooth,
+        uint count
+    )
         public
         returns (bool success);
 

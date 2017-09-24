@@ -1,4 +1,5 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
+
 
 contract TollBoothHolderI {
 
@@ -65,5 +66,5 @@ contract TollBoothHolderI {
      * - a contract named `TollBoothHolder` that:
      *     - is `OwnedI`, `TollBoothHolderI`.
      *     - has a constructor that takes no parameter.
-     */        
+     */
 }

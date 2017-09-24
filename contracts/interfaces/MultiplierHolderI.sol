@@ -1,4 +1,5 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
+
 
 contract MultiplierHolderI {
 
@@ -25,8 +26,8 @@ contract MultiplierHolderI {
      * Emits LogMultiplierSet.
      */
     function setMultiplier(
-            uint vehicleType,
-            uint multiplier)
+        uint vehicleType,
+        uint multiplier)
         public
         returns(bool success);
 
@@ -47,5 +48,5 @@ contract MultiplierHolderI {
      * - a contract named `MultiplierHolder` that:
      *     - is `OwnedI` and `MultiplierHolderI`.
      *     - has a constructor that takes no parameter.
-     */        
+     */
 }

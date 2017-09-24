@@ -1,4 +1,5 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
+
 
 contract RoutePriceHolderI {
 
@@ -36,9 +37,9 @@ contract RoutePriceHolderI {
      * Emits LogPriceSet.
      */
     function setRoutePrice(
-            address entryBooth,
-            address exitBooth,
-            uint priceWeis)
+        address entryBooth,
+        address exitBooth,
+        uint priceWeis)
         public
         returns(bool success);
 
@@ -50,8 +51,8 @@ contract RoutePriceHolderI {
      *     If the route is invalid, it should return 0.
      */
     function getRoutePrice(
-            address entryBooth,
-            address exitBooth)
+        address entryBooth,
+        address exitBooth)
         constant
         public
         returns(uint priceWeis);

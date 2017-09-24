@@ -1,6 +1,7 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
 
 import "./RegulatorI.sol";
+
 
 contract RegulatedI {
     /**

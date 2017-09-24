@@ -1,6 +1,7 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
 
 import "./TollBoothOperatorI.sol";
+
 
 contract RegulatorI {
 
@@ -75,8 +76,8 @@ contract RegulatorI {
      * Emits LogTollBoothOperatorCreated.
      */
     function createNewOperator(
-            address owner,
-            uint deposit)
+        address owner,
+        uint deposit)
         public
         returns(TollBoothOperatorI newOperator);
 
@@ -117,5 +118,5 @@ contract RegulatorI {
      * - a contract named `Regulator` that:
      *     - is `OwnedI` and `RegulatorI`.
      *     - has a constructor that takes no parameter.
-     */        
+     */
 }

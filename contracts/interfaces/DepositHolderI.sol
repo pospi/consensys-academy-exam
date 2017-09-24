@@ -1,4 +1,5 @@
-pragma solidity ^0.4.13;
+pragma solidity 0.4.15;
+
 
 contract DepositHolderI {
 
@@ -38,5 +39,5 @@ contract DepositHolderI {
      *     - is `OwnedI`, and `DepositHolderI`.
      *     - has a constructor that takes:
      *         - one `uint` parameter, the initial deposit wei value, which cannot be 0.
-     */        
+     */
 }
