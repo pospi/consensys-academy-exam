@@ -16,6 +16,7 @@ contract Owned is OwnedI {
 
     function Owned() {
         //@log Owned created (testing natspec logging...)
+        owner = msg.sender;
     }
 
     /**
@@ -34,9 +35,10 @@ contract Owned is OwnedI {
      * @return Whether the action was successful.
      * Emits LogOwnerSet.
      */
-    function setOwner(address newOwner) returns(bool success) {
+    function setOwner(address newOwner) fromOwner() returns(bool success) {
         owner = newOwner;
         LogOwnerSet(owner, newOwner);
+        return true;
     }
 
     /**
