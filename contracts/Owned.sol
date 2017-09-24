@@ -36,8 +36,12 @@ contract Owned is OwnedI {
      * Emits LogOwnerSet.
      */
     function setOwner(address newOwner) fromOwner() returns(bool success) {
-        owner = newOwner;
+        require(newOwner != 0);
+        require(newOwner != owner);
+
         LogOwnerSet(owner, newOwner);
+
+        owner = newOwner;
         return true;
     }
 
