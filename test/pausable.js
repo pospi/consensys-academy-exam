@@ -38,6 +38,18 @@ contract('Pausable', (accounts) => {
 
 	})
 
+	describe("errors", () => {
+
+		it("should not allow changing the paused flag if the input is identical", async() => {
+			const paused = await Pausable.new(true, { from: owner0 })
+			return expectedExceptionPromise(
+				() => paused.setPaused(true, { from: owner0, gas: 3000000 }),
+				3000000
+			)
+		})
+
+	})
+
 	describe("whenPaused", () => {
 
 		it("allows actions when paused", async() => {
