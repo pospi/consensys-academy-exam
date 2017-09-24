@@ -21,7 +21,7 @@ contract TestOwnedB {
 
     function testInitialOwner() {
         OwnedI owned;
-        for(uint index = 0; index < instanceCount; index++) {
+        for (uint index = 0; index < instanceCount; index++) {
             owned = createInstance(index);
             Assert.equal(owned.getOwner(), this, "Owner should have been set");
         }
@@ -29,7 +29,7 @@ contract TestOwnedB {
 
     function testCanChangeOwner() {
         OwnedI owned;
-        for(uint index = 0; index < instanceCount; index++) {
+        for (uint index = 0; index < instanceCount; index++) {
             owned = createInstance(index);
             address newOwner = 0x0123456789abcDEF0123456789abCDef01234567;
             Assert.isTrue(owned.setOwner(newOwner), "Failed to change owner");
