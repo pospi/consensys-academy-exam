@@ -74,7 +74,7 @@ contract Regulator is RegulatorI, Owned
 		public
 		returns(uint vehicleType)
 	{
-		return uint(vehicleTypes[vehicleType]);
+		return uint(vehicleTypes[vehicle]);
 	}
 
 	/**
