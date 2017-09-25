@@ -80,6 +80,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "npm-run-all": "^4.1.1",
+    "solidity-sha3": "^0.4.1",
     "truffle": "3.4.9"
   }
 }
