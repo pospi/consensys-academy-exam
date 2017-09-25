@@ -110,7 +110,7 @@ contract Regulator is RegulatorI, Owned
 	{
 		require(owner != getOwner());
 
-		TollBoothOperatorI newOperator = new TollBoothOperator(true, deposit, this);
+		newOperator = new TollBoothOperator(true, deposit, this);
 		approvedOperators[address(newOperator)] = true;
 
 		LogTollBoothOperatorCreated(msg.sender, newOperator, owner, deposit);
