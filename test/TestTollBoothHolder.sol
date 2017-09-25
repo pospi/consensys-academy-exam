@@ -16,7 +16,7 @@ contract TestTollBoothHolder
 		address booth = new DummyAddress();
 
 		TollBoothHolder test = new TollBoothHolder();
-		Assert.isTrue(test.addTollBooth(booth));
-		Assert.isTrue(test.isTollBooth(booth));
+		Assert.isTrue(test.addTollBooth(booth), "Toll booth could not be added");
+		Assert.isTrue(test.isTollBooth(booth), "Toll booth was not registered");
 	}
 }
