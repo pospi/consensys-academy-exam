@@ -220,7 +220,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		uint currentNumPayments = getPendingPaymentCount(entryBooth, exitBooth);
 
 		require(count > 0);
-		require(currentNumPayments <= count);
+		require(currentNumPayments >= count);
 		require(isTollBooth(entryBooth) && isTollBooth(exitBooth));
 
 		for (uint i = 0; i < count; ++i) {
