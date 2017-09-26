@@ -65,6 +65,13 @@ contract('TollBoothOperator', (accounts) => {
 			)
 		})
 
+		it("should prevent entry to the road when vehicle is not registered", async() => {
+			return expectedExceptionPromise(
+				() => test.enterRoad(booth0, hash("helo"), { from: owner2, value: web3.toWei(1, 'ether'), gas: 3000000 }),
+				3000000
+			)
+		})
+
 		it("should reject if insufficient funds were paid", async() => {
 			return expectedExceptionPromise(
 				() => test.setVehicleType(vehicle0, 1, { from: owner0, value: web3.toWei(1, 'wei'), gas: 3000000 }),
