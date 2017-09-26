@@ -328,7 +328,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 
 		uint fee = basePrice * getVehicleMultiplier(vehicle);
 		uint deposit = activeVehicles[exitSecretHashed].depositedWeis;
-		uint refund = fee > deposit ? deposit : deposit - fee;
+		uint refund = fee > deposit ? 0 : deposit - fee;
 
 		// exit the road
 		delete activeVehicles[exitSecretHashed];
