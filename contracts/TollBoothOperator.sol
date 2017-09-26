@@ -179,7 +179,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		require(vehicle != 0x0);
 		require(msg.sender != entryBooth);
 
-		return handleVehicleExit(hashed, true);
+		return handleVehicleExit(hashed, false);
 	}
 
 	/**
@@ -220,11 +220,11 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		uint currentNumPayments = getPendingPaymentCount(entryBooth, exitBooth);
 
 		require(count > 0);
+		require(currentNumPayments <= count);
 		require(isTollBooth(entryBooth) && isTollBooth(exitBooth));
-		require(currentNumPayments < count);
 
 		for (uint i = 0; i < count; ++i) {
-			handleVehicleExit(pendingPayments[entryBooth][exitBooth][i], false);
+			handleVehicleExit(pendingPayments[entryBooth][exitBooth][i], true);
 		}
 
 		return true;
