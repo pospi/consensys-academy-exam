@@ -14,7 +14,8 @@ module.exports = async (deployer, network, accounts) => {
 
 	await deployer.deploy(Regulator, { from: regulatorOwner })
 
-	const tx = await Regulator.createNewOperator(operatorOwner, 100, { from: regulatorOwner })
+	const regulator = await Regulator.at(Regulator.address)
+	const tx = await regulator.createNewOperator(operatorOwner, 100, { from: regulatorOwner })
 	const op = await TollBoothOperator.at(tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator)
 
 	await op.setPaused(true, { from: operatorOwner })
