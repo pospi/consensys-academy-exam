@@ -17,6 +17,8 @@ contract TestRoutePriceHolder
 		address exitBooth = new DummyAddress();
 
 		RoutePriceHolder test = new RoutePriceHolder();
+		test.addTollBooth(entryBooth);
+		test.addTollBooth(exitBooth);
 		Assert.isTrue(test.setRoutePrice(entryBooth, exitBooth, 100), "Route price not set");
 		Assert.equal(test.getRoutePrice(entryBooth, exitBooth), 100, "Route price was not changed");
 	}
