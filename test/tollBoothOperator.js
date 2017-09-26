@@ -10,6 +10,7 @@ const hash = require('solidity-sha3')
 const expectedExceptionPromise = require("../utils/expectedException")
 
 const Regulator = artifacts.require("./Regulator.sol")
+const TollBoothOperator = artifacts.require("./TollBoothOperator.sol")
 
 contract('TollBoothOperator', (accounts) => {
 
@@ -33,15 +34,16 @@ contract('TollBoothOperator', (accounts) => {
 
 	beforeEach("make new test case", async() => {
 		regulator0 = await Regulator.new({ from: regulatorOwner0 })
-		assert.isTrue(await regulator0.setVehicleType(vehicle0, 1, { from: regulatorOwner0 }))
-		assert.isTrue(await regulator0.setVehicleType(vehicle1, 2, { from: regulatorOwner0 }))
+		await regulator0.setVehicleType(vehicle0, 1, { from: regulatorOwner0 })
+		await regulator0.setVehicleType(vehicle1, 2, { from: regulatorOwner0 })
 
-		test = await regulator0.createNewOperator(boothOwner, 10, { from: regulatorOwner0 })
-		assert.isTrue(await test.setMultiplier(1, 1, { from: boothOwner }))
-		assert.isTrue(await test.setMultiplier(2, 3, { from: boothOwner }))
-		assert.isTrue(await test.addTollBooth(booth0, { from: boothOwner }))
-		assert.isTrue(await test.addTollBooth(booth1, { from: boothOwner }))
-		assert.isTrue(await test.setRoutePrice(booth0, booth1, 2, { from: boothOwner }))
+		const tx = await regulator0.createNewOperator(boothOwner, 10, { from: regulatorOwner0 })
+		test = await TollBoothOperator.at(tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator)
+		await test.setMultiplier(1, 1, { from: boothOwner })
+		await test.setMultiplier(2, 3, { from: boothOwner })
+		await test.addTollBooth(booth0, { from: boothOwner })
+		await test.addTollBooth(booth1, { from: boothOwner })
+		await test.setRoutePrice(booth0, booth1, 2, { from: boothOwner })
 	})
 
 	describe("enterRoad", () => {
