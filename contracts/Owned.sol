@@ -16,7 +16,6 @@ contract Owned is OwnedI {
 
     function Owned() {
         owner = msg.sender;
-        LogOwnerSet(0x0, owner);
     }
 
     /**
