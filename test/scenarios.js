@@ -19,15 +19,14 @@ contract('Scenarios', (accounts) => {
 
 	let test,
 		booth1, booth2, boothNoFee, boothOwner,
-		owner1, owner2, vehicle1, vehicle2, vehicle3,
+		owner1, vehicle1, vehicle2, vehicle3,
 		regulator0, regulatorOwner0,
-		hash0, hash1, hash2
+		hash1, hash2
 
 	before("should prepare", () => {
 		assert.isAtLeast(accounts.length, 10)
 		vehicle3 = accounts[0]
 		owner1 = accounts[1]
-		owner2 = accounts[4]
 		vehicle1 = accounts[2]
 		vehicle2 = accounts[3]
 		regulatorOwner0 = accounts[5]
@@ -52,7 +51,6 @@ contract('Scenarios', (accounts) => {
 		await test.addTollBooth(booth2, { from: boothOwner })
 		await test.addTollBooth(boothNoFee, { from: boothOwner })
 
-		hash0 = await test.hashSecret(web3.fromAscii("helo"))
 		hash1 = await test.hashSecret(web3.fromAscii("YOULOSTTHEGAME"))
 		hash2 = await test.hashSecret(web3.fromAscii("ILIEKMUDKIPS"))
 	})
@@ -157,22 +155,24 @@ contract('Scenarios', (accounts) => {
 	// `vehicle2` gets refunded the difference.
 	describe("scenario 6", () => {
 
-		it("succeeds", async() => {
+		it.only("succeeds", async() => {
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1020 })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
-
-			await test.enterRoad(booth1, hash2, { from: vehicle2, value: 1000 })
-
-			// :TODO: still crashing from 'mutiple calls to reportExitRoad' bug
+			await test.enterRoad(booth1, hash2, { from: vehicle2, value: 2000 })
 			await test.reportExitRoad(web3.fromAscii("ILIEKMUDKIPS"), { from: boothNoFee })
 
+			assert.strictEqual((await test.getPendingPaymentCount(booth1, boothNoFee)).toNumber(), 2)
+
 			const tx1 = await test.setRoutePrice(booth1, boothNoFee, 1010, { from: boothOwner })
-			const tx2 = await test.clearSomePendingPayments(booth1, boothNoFee, 1, { from: boothOwner })
+			assert.strictEqual((await test.getPendingPaymentCount(booth1, boothNoFee)).toNumber(), 1)
+
+			// const tx2 = await test.clearSomePendingPayments(booth1, boothNoFee, 1, { from: owner1 })
+			// assert.strictEqual((await test.getPendingPaymentCount(booth1, boothNoFee)).toNumber(), 0)
 
 			const exit1 = tx1.logs.find(l => l.event === 'LogRoadExited')
-			const exit2 = tx2.logs.find(l => l.event === 'LogRoadExited')
-
-			// assert.strictEqual(10, refund.toNumber())
+			assert.strictEqual(exit1.args.refundWeis.toNumber(), 10)
+			// const exit2 = tx2.logs.find(l => l.event === 'LogRoadExited')
+			// assert.strictEqual(exit2.args.refundWeis.toNumber(), 900)
 		})
 
 	})
