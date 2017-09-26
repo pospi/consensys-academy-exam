@@ -25,6 +25,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	}
 
 	mapping(bytes32 => VehicleEntry) activeVehicles;
+	mapping(address => mapping(address => bytes32[])) pendingPayments;
 
 	function TollBoothOperator(bool paused, uint depositWei, address regulator)
 		TollBoothHolder()
@@ -88,7 +89,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	{
 		require(isTollBooth(entryBooth));
 		require(getRegulator().getVehicleType(msg.sender) != 0);
-		require(msg.value >= getDeposit() * getMultiplier(getRegulator().getVehicleType(msg.sender)));
+		require(msg.value >= getRequiredVehicleDeposit(msg.sender));
 
 		activeVehicles[exitSecretHashed] = VehicleEntry({
 			vehicle: msg.sender,
@@ -168,7 +169,15 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		public
 		returns (uint status)
 	{
+		bytes32 hashed = keccak256(exitSecretClear);
+		address vehicle = activeVehicles[hashed].vehicle;
+		address entryBooth = activeVehicles[hashed].entryBooth;
 
+		require(isTollBooth(msg.sender));
+		require(vehicle != 0x0);
+		require(msg.sender != entryBooth);
+
+		return handleVehicleExit(hashed, true);
 	}
 
 	/**
@@ -182,7 +191,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		public
 		returns (uint count)
 	{
-
+		return pendingPayments[entryBooth][exitBooth].length;
 	}
 
 	/**
@@ -202,10 +211,21 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		address exitBooth,
 		uint count
 	)
+		whenNotPaused()
 		public
 		returns (bool success)
 	{
+		uint currentNumPayments = getPendingPaymentCount(entryBooth, exitBooth);
 
+		require(count > 0);
+		require(isTollBooth(entryBooth) && isTollBooth(exitBooth));
+		require(currentNumPayments < count);
+
+		for (uint i = 0; i < count; ++i) {
+			handleVehicleExit(pendingPayments[entryBooth][exitBooth][i], false);
+		}
+
+		return true;
 	}
 
 	/**
@@ -241,6 +261,55 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		returns(bool success)
 	{
 
+	}
+
+	function handleVehicleExit(bytes32 exitSecretHashed, bool skipPendingHandling)
+		private
+		returns(uint status)
+	{
+		address vehicle = activeVehicles[exitSecretHashed].vehicle;
+		address entryBooth = activeVehicles[exitSecretHashed].entryBooth;
+
+		uint basePrice = getRoutePrice(entryBooth, msg.sender);
+
+		// if no route price, we can't do anything yet. Payment remains and gets logged "pending".
+		if (!skipPendingHandling && basePrice == 0) {
+			pendingPayments[entryBooth][msg.sender].push(exitSecretHashed);
+			LogPendingPayment(exitSecretHashed, entryBooth, msg.sender);
+			return 2;
+		}
+
+		uint fee = basePrice * getVehicleMultiplier(vehicle);
+		uint deposit = activeVehicles[exitSecretHashed].depositedWeis;
+		uint refund = fee > deposit ? deposit : deposit - fee;
+
+		// exit the road
+		delete activeVehicles[exitSecretHashed];
+
+		// log an event
+		LogRoadExited(msg.sender, exitSecretHashed, fee, refund);
+
+		// refund any extra deposit back to the vehicle
+		// don't bother caring if it fails, their fault for trying to exploit us
+		vehicle.send(refund);
+
+		return 1;
+	}
+
+	function getRequiredVehicleDeposit(address vehicle)
+		constant
+		internal
+		returns(uint fee)
+	{
+		return getDeposit() * getVehicleMultiplier(vehicle);
+	}
+
+	function getVehicleMultiplier(address vehicle)
+		constant
+		internal
+		returns(uint mult)
+	{
+		return getMultiplier(getRegulator().getVehicleType(vehicle));
 	}
 
 }
