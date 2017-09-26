@@ -30,8 +30,8 @@ contract('RoutePriceHolder', (accounts) => {
 
 		it("should allow setting route price if the owner", async() => {
 			await Promise.all([test.addTollBooth(booth0, { from: owner0 }), test.addTollBooth(booth1, { from: owner0 })])
-			assert.isTrue(await test.setRoutePrice(booth0, booth1, 43, { from: owner0 }))
-			assert.strictEqual(await test.getRoutePrice(booth0, booth1), 43)
+			await test.setRoutePrice(booth0, booth1, 43, { from: owner0 })
+			assert.strictEqual((await test.getRoutePrice(booth0, booth1)).toNumber(), 43)
 		})
 
 		it("should not allow setting route price if not the owner", async() => {
