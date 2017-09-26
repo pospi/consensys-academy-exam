@@ -17,7 +17,8 @@ contract('TollBoothOperator', (accounts) => {
 	let test,
 		booth0, booth1, boothOwner,
 		owner0, owner1, owner2, vehicle0, vehicle1,
-		regulator0, regulatorOwner0
+		regulator0, regulatorOwner0,
+		hash0, hash1, hash2
 
 	before("should prepare", () => {
 		assert.isAtLeast(accounts.length, 9)
@@ -45,44 +46,111 @@ contract('TollBoothOperator', (accounts) => {
 		await test.addTollBooth(booth0, { from: boothOwner })
 		await test.addTollBooth(booth1, { from: boothOwner })
 		await test.setRoutePrice(booth0, booth1, 2, { from: boothOwner })
+
+		hash0 = await test.hashSecret(web3.fromAscii("helo"))
+		hash1 = await test.hashSecret(web3.fromAscii("YOULOSTTHEGAME"))
+		hash2 = await test.hashSecret(web3.fromAscii("helo"))
 	})
 
 	describe("enterRoad", () => {
 
 		it("should allow entry to the road", async() => {
-			await test.enterRoad(booth0, makeHash("helo"), { from: vehicle0, value: web3.toWei(1, 'ether') })
-			const [ vehicle, entryBooth, depositedWeis, ...others ] = await test.getVehicleEntry(makeHash("helo"))
+			await test.enterRoad(booth0, hash0, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			const [vehicle, entryBooth, depositedWeis, ...others] = await test.getVehicleEntry(hash0)
 			assert.strictEqual(others.length, 0, "Vehicle entry data returned incorrectly")
-			assert.notEqual(vehicle, 0x0, "Road entry vehicle not recorded")
-			assert.notEqual(entryBooth, 0x0, "Road entry booth not recorded")
-			assert.notEqual(depositedWeis, 0, "Road entry deposit not recorded")
+			assert.notEqual(vehicle, '0x0000000000000000000000000000000000000000', "Road entry vehicle not recorded")
+			assert.notEqual(entryBooth, '0x0000000000000000000000000000000000000000', "Road entry booth not recorded")
+			assert.notEqual(depositedWeis.toNumber(), 0, "Road entry deposit not recorded")
 		})
 
 		it("should prevent entry to the road when paused", async() => {
 			await test.setPaused(true, { from: boothOwner })
 			return expectedExceptionPromise(
-				() => test.enterRoad(booth0, makeHash("helo"), { from: vehicle0, value: web3.toWei(4, 'wei'), gas: 3000000 }),
+				() => test.enterRoad(booth0, hash0, { from: vehicle0, value: web3.toWei(4, 'wei'), gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should prevent entry to the road when entry booth is invalid", async() => {
 			return expectedExceptionPromise(
-				() => test.enterRoad(owner1, makeHash("helo"), { from: vehicle0, value: web3.toWei(1, 'ether'), gas: 3000000 }),
+				() => test.enterRoad(owner1, hash0, { from: vehicle0, value: web3.toWei(1, 'ether'), gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should prevent entry to the road when vehicle is not registered", async() => {
 			return expectedExceptionPromise(
-				() => test.enterRoad(booth0, makeHash("helo"), { from: owner2, value: web3.toWei(1, 'ether'), gas: 3000000 }),
+				() => test.enterRoad(booth0, hash0, { from: owner2, value: web3.toWei(1, 'ether'), gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should reject if insufficient funds were paid", async() => {
 			return expectedExceptionPromise(
-				() => test.enterRoad(booth0, makeHash("helo"), { from: vehicle0, value: web3.toWei(1, 'wei'), gas: 3000000 }),
+				() => test.enterRoad(booth0, hash0, { from: vehicle0, value: web3.toWei(1, 'wei'), gas: 3000000 }),
+				3000000
+			)
+		})
+
+	})
+
+	describe("reportExitRoad", () => {
+
+		it("should handle vehicles exiting the road", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
+		})
+
+		it.only("should clear vehicle visit data when exiting the road", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
+
+			const [vehicle, entryBooth, depositedWeis, ...others] = await test.getVehicleEntry(hash1)
+			assert.strictEqual(others.length, 0, "Vehicle entry data returned incorrectly")
+			assert.strictEqual(vehicle, '0x0000000000000000000000000000000000000000', "Road entry vehicle not cleared")
+			assert.strictEqual(entryBooth, '0x0000000000000000000000000000000000000000', "Road entry booth not cleared")
+			assert.strictEqual(depositedWeis.toNumber(), 0, "Road entry deposit not cleared")
+			assert.strictEqual((await test.getPendingPaymentCount(booth0, booth1)).toNumber(), 0)
+		})
+
+		it("should refund vehicle deposit difference when exiting the road", async() => {
+			const depositAmount = web3.toWei(1, 'ether')
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: depositAmount })
+			const tx = await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
+
+			const refund = tx.logs.find(l => l.event === 'LogRoadExited').args.refundWeis
+			assert.strictEqual(web3.toBigNumber(depositAmount).minus(2).toString(10), refund.toString(10))
+		})
+
+		it("should prevent vehicles exiting the road when paused", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.setPaused(true, { from: boothOwner })
+			return expectedExceptionPromise(
+				() => test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		it("should prevent vehicles exiting the road if sender is not a toll booth", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			return expectedExceptionPromise(
+				() => test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: owner2, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		it("should roll back if entry and exit TollBooths are the same", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			return expectedExceptionPromise(
+				() => test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth0, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		it("should roll back if vehicle exit nonce does not match", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			return expectedExceptionPromise(
+				() => test.reportExitRoad(web3.fromAscii("ILIEKMUDKIPS"), { from: booth1, gas: 3000000 }),
 				3000000
 			)
 		})
