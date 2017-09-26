@@ -15,8 +15,8 @@ contract Owned is OwnedI {
     }
 
     function Owned() {
-        //@log Owned created (testing natspec logging...)
         owner = msg.sender;
+        LogOwnerSet(0x0, owner);
     }
 
     /**
