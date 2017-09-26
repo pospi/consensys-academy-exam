@@ -16,6 +16,7 @@ contract DepositHolder is DepositHolderI, Owned
 	uint depositDesired;	// you sould send more weis than this value with your creation transaction
 
 	function DepositHolder(uint depositWeis) Owned() payable {
+		require(depositWeis > 0);
 		depositDesired = depositWeis;
 	}
 
