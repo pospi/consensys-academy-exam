@@ -26,7 +26,8 @@ contract('TollBoothHolder', (accounts) => {
 
 		it("should allow adding toll booths if the owner", async() => {
 			const test = await TollBoothHolder.new({ from: owner0 })
-			assert.isTrue(await test.addTollBooth(booth0, { from: owner0 }))
+			await test.addTollBooth(booth0, { from: owner0 })
+			assert.isTrue(await test.isTollBooth(booth0))
 		})
 
 		it("should not allow adding toll booths if not the owner", async() => {
@@ -60,13 +61,15 @@ contract('TollBoothHolder', (accounts) => {
 
 		it("should allow removing toll booths if the owner", async() => {
 			const test = await TollBoothHolder.new({ from: owner0 })
-			assert.isTrue(await test.addTollBooth(booth0, { from: owner0 }))
-			assert.isTrue(await test.removeTollBooth(booth0, { from: owner0 }))
+			await test.addTollBooth(booth0, { from: owner0 })
+			assert.isTrue(await test.isTollBooth(booth0))
+			await test.removeTollBooth(booth0, { from: owner0 })
+			assert.isFalse(await test.isTollBooth(booth0))
 		})
 
 		it("should not allow removing toll booths if not the owner", async() => {
 			const test = await TollBoothHolder.new({ from: owner0 })
-			assert.isTrue(await test.addTollBooth(booth0, { from: owner0 }))
+			await test.addTollBooth(booth0, { from: owner0 })
 			return expectedExceptionPromise(
 				() => test.removeTollBooth(booth0, { from: owner1, gas: 3000000 }),
 				3000000
