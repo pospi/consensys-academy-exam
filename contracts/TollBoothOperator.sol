@@ -320,9 +320,12 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		uint basePrice = getRoutePrice(entryBooth, exitBooth);
 
 		// if no route price, we can't do anything yet. Payment remains and gets logged "pending".
-		if (!isPending && basePrice == 0) {
-			pendingPayments[entryBooth][exitBooth].push(exitSecretHashed);
-			LogPendingPayment(exitSecretHashed, entryBooth, exitBooth);
+		if (basePrice == 0) {
+			// but don't add us twice if we were already pending!
+			if (!isPending) {
+				pendingPayments[entryBooth][exitBooth].push(exitSecretHashed);
+				LogPendingPayment(exitSecretHashed, entryBooth, exitBooth);
+			}
 			return 2;
 		}
 
