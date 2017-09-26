@@ -179,9 +179,9 @@ contract('TollBoothOperator', (accounts) => {
 			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
 			await test.enterRoad(booth0, hash2, { from: vehicle1, value: web3.toWei(1, 'ether') })
-			// await test.reportExitRoad(web3.fromAscii("ILIEKMUDKIPS"), { from: boothNoFee })
+			await test.reportExitRoad(web3.fromAscii("ILIEKMUDKIPS"), { from: boothNoFee })
 			await test.enterRoad(booth0, hash0, { from: vehicle2, value: web3.toWei(1, 'ether') })
-			// await test.reportExitRoad(web3.fromAscii("helo"), { from: boothNoFee })
+			await test.reportExitRoad(web3.fromAscii("helo"), { from: boothNoFee })
 
 			await test.setRoutePrice(booth0, boothNoFee, 3, { from: boothOwner })
 		})
