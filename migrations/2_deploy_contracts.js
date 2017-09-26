@@ -9,7 +9,7 @@
 const Regulator = artifacts.require("./Regulator.sol")
 const TollBoothOperator = artifacts.require("./TollBoothOperator.sol")
 
-module.exports = async (deployer, network, accounts) => {
+module.exports = (deployer, network, accounts) => deployer.then(async() => {
 	const [regulatorOwner, operatorOwner] = accounts
 
 	await deployer.deploy(Regulator, { from: regulatorOwner })
@@ -18,5 +18,5 @@ module.exports = async (deployer, network, accounts) => {
 	const tx = await regulator.createNewOperator(operatorOwner, 100, { from: regulatorOwner })
 	const op = await TollBoothOperator.at(tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator)
 
-	await op.setPaused(true, { from: operatorOwner })
-}
+	await op.setPaused(false, { from: operatorOwner })
+})
