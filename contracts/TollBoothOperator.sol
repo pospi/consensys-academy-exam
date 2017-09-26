@@ -226,6 +226,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		for (uint i = 0; i < count; ++i) {
 			handleVehicleExit(pendingPayments[entryBooth][exitBooth][i], exitBooth, true);
 		}
+		pendingPayments[entryBooth][exitBooth].length -= count;
 
 		return true;
 	}
@@ -332,8 +333,8 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		// exit the road
 		delete activeVehicles[exitSecretHashed];
 		if (isPending) {
-			delete pendingPayments[entryBooth][exitBooth][pendingPayments[entryBooth][exitBooth].length - 1];
-			pendingPayments[entryBooth][exitBooth].length -= 1;
+			uint lastIdx = pendingPayments[entryBooth][exitBooth].length - 1;
+			delete pendingPayments[entryBooth][exitBooth][lastIdx];
 		}
 
 		// log an event
