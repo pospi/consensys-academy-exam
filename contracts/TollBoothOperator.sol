@@ -27,6 +27,8 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	mapping(bytes32 => VehicleEntry) activeVehicles;
 	mapping(address => mapping(address => bytes32[])) pendingPayments;
 
+	uint feesRecoverable = 0;
+
 	function TollBoothOperator(bool paused, uint depositWei, address regulator)
 		TollBoothHolder()
 		DepositHolder(depositWei)
@@ -236,7 +238,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		public
 		returns(uint amount)
 	{
-
+		return feesRecoverable;
 	}
 
 	/**
@@ -257,12 +259,56 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	 * Emits LogFeesCollected.
 	 */
 	function withdrawCollectedFees()
+		fromOwner()
 		public
 		returns(bool success)
 	{
+		require(feesRecoverable > 0);
 
+		LogFeesCollected(owner, feesRecoverable);
+
+		feesRecoverable = 0;
+
+		if (!owner.send(feesRecoverable)) {
+			revert();
+		}
+
+		return true;
 	}
 
+	/**
+	 * Inherited to process pending payments upon new prices being set
+	 *
+	 * @param entryBooth The address of the entry booth of the route set.
+	 * @param exitBooth The address of the exit booth of the route set.
+	 * @param priceWeis The price in weis of the new route.
+	 * @return Whether the action was successful.
+	 */
+	function setRoutePrice(
+		address entryBooth,
+		address exitBooth,
+		uint priceWeis
+	)
+		fromOwner()
+		public
+		returns(bool success)
+	{
+		bool ok = RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
+
+		if (getPendingPaymentCount(entryBooth, exitBooth) > 0) {
+			clearSomePendingPayments(entryBooth, exitBooth, 1);
+		}
+
+		return ok;
+	}
+
+	/**
+	 * Internal methodr to process vehicle exits
+	 *
+	 * @param  exitSecretHashed    vehicle's exit nonce hash
+	 * @param  skipPendingHandling if true, don't run "pending" processing (use when running to clear pending payments)
+	 * @return 1 if vehicle exited, 2 if vehicle is now pending final payment
+	 */
 	function handleVehicleExit(bytes32 exitSecretHashed, bool skipPendingHandling)
 		private
 		returns(uint status)
@@ -288,6 +334,9 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 
 		// log an event
 		LogRoadExited(msg.sender, exitSecretHashed, fee, refund);
+
+		// track what is payable to owner
+		feesRecoverable += fee;
 
 		// refund any extra deposit back to the vehicle
 		// don't bother caring if it fails, their fault for trying to exploit us
