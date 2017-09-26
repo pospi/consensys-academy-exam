@@ -6,7 +6,7 @@
  */
 /* global contract before describe beforeEach assert artifacts it web3 */
 
-const hash = require('solidity-sha3')
+const makeHash = require('solidity-sha3').default
 const expectedExceptionPromise = require("../utils/expectedException")
 
 const Regulator = artifacts.require("./Regulator.sol")
@@ -39,6 +39,7 @@ contract('TollBoothOperator', (accounts) => {
 
 		const tx = await regulator0.createNewOperator(boothOwner, 10, { from: regulatorOwner0 })
 		test = await TollBoothOperator.at(tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator)
+		await test.setPaused(false, { from: boothOwner })
 		await test.setMultiplier(1, 1, { from: boothOwner })
 		await test.setMultiplier(2, 3, { from: boothOwner })
 		await test.addTollBooth(booth0, { from: boothOwner })
@@ -49,34 +50,39 @@ contract('TollBoothOperator', (accounts) => {
 	describe("enterRoad", () => {
 
 		it("should allow entry to the road", async() => {
-			assert.isTrue(await test.enterRoad(booth0, hash("helo"), { from: vehicle0, value: web3.toWei(1, 'ether') }))
+			await test.enterRoad(booth0, makeHash("helo"), { from: vehicle0, value: web3.toWei(1, 'ether') })
+			const [ vehicle, entryBooth, depositedWeis, ...others ] = await test.getVehicleEntry(makeHash("helo"))
+			assert.strictEqual(others.length, 0, "Vehicle entry data returned incorrectly")
+			assert.notEqual(vehicle, 0x0, "Road entry vehicle not recorded")
+			assert.notEqual(entryBooth, 0x0, "Road entry booth not recorded")
+			assert.notEqual(depositedWeis, 0, "Road entry deposit not recorded")
 		})
 
 		it("should prevent entry to the road when paused", async() => {
-			await test.setPaused(true, { from: owner0 })
+			await test.setPaused(true, { from: boothOwner })
 			return expectedExceptionPromise(
-				() => test.enterRoad(booth0, hash("helo"), { from: vehicle0, value: web3.toWei(4, 'wei'), gas: 3000000 }),
+				() => test.enterRoad(booth0, makeHash("helo"), { from: vehicle0, value: web3.toWei(4, 'wei'), gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should prevent entry to the road when entry booth is invalid", async() => {
 			return expectedExceptionPromise(
-				() => test.enterRoad(owner1, hash("helo"), { from: vehicle0, value: web3.toWei(1, 'ether'), gas: 3000000 }),
+				() => test.enterRoad(owner1, makeHash("helo"), { from: vehicle0, value: web3.toWei(1, 'ether'), gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should prevent entry to the road when vehicle is not registered", async() => {
 			return expectedExceptionPromise(
-				() => test.enterRoad(booth0, hash("helo"), { from: owner2, value: web3.toWei(1, 'ether'), gas: 3000000 }),
+				() => test.enterRoad(booth0, makeHash("helo"), { from: owner2, value: web3.toWei(1, 'ether'), gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should reject if insufficient funds were paid", async() => {
 			return expectedExceptionPromise(
-				() => test.setVehicleType(vehicle0, 1, { from: owner0, value: web3.toWei(1, 'wei'), gas: 3000000 }),
+				() => test.enterRoad(booth0, makeHash("helo"), { from: vehicle0, value: web3.toWei(1, 'wei'), gas: 3000000 }),
 				3000000
 			)
 		})
@@ -86,8 +92,9 @@ contract('TollBoothOperator', (accounts) => {
 	describe("setRoutePrice", () => {
 
 		it("should allow setting route price even if paused", async() => {
-			await test.setPaused(true, { from: owner0 })
-			assert.isTrue(await test.setRoutePrice(booth0, booth1, 6, { from: owner0 }))
+			await test.setPaused(true, { from: boothOwner })
+			await test.setRoutePrice(booth0, booth1, 6, { from: boothOwner })
+			assert.strictEqual((await test.getRoutePrice(booth0, booth1)).toNumber(), 6, "Route price not updated")
 		})
 
 	})
