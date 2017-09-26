@@ -344,8 +344,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		feesRecoverable += fee;
 
 		// refund any extra deposit back to the vehicle
-		// don't bother caring if it fails, their fault for trying to exploit us
-		vehicle.send(refund);
+		require(vehicle.send(refund));
 
 		return 1;
 	}
