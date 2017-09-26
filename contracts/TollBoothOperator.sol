@@ -324,8 +324,8 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 			// but don't add us twice if we were already pending!
 			if (!isPending) {
 				pendingPayments[entryBooth][exitBooth].push(exitSecretHashed);
-				LogPendingPayment(exitSecretHashed, entryBooth, exitBooth);
 			}
+			LogPendingPayment(exitSecretHashed, entryBooth, exitBooth);
 			return 2;
 		}
 
