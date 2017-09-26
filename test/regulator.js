@@ -77,7 +77,8 @@ contract('Regulator', (accounts) => {
 
 		it("should create new operators which start initially paused", async() => {
 			const test = await Regulator.new({ from: owner0 })
-			const operator = await test.createNewOperator(owner1, 100, { from: owner0 })
+			const tx = await test.createNewOperator(owner1, 100, { from: owner0 })
+			const operator = tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator
 			assert.isTrue(await operator.isPaused())
 		})
 
@@ -95,8 +96,10 @@ contract('Regulator', (accounts) => {
 
 		it("should allow removing operators if the owner", async() => {
 			const test = await Regulator.new({ from: owner0 })
-			await test.createNewOperator(owner1, 100, { from: owner0 })
-			assert.isTrue(await test.removeOperator(owner1, { from: owner0 }))
+			const tx = await test.createNewOperator(owner1, 100, { from: owner0 })
+			const operator = tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator
+			await test.removeOperator(operator, { from: owner0 })
+			assert.isFalse(await test.isOperator(operator))
 		})
 
 		it("should not allow removing operators if not the owner", async() => {
