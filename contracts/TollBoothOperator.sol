@@ -311,7 +311,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	 * @return 1 if vehicle exited, 2 if vehicle is now pending final payment
 	 */
 	function handleVehicleExit(bytes32 exitSecretHashed, address exitBooth, bool isPending)
-		private
+		internal
 		returns(uint status)
 	{
 		address vehicle = activeVehicles[exitSecretHashed].vehicle;
