@@ -30,7 +30,7 @@ contract('Regulated', (accounts) => {
 	describe("initialisation", () => {
 
 		it("should store the provided regulator address when creating", async() => {
-			const test1 = await Regulated.new(regulator.address.toString(16), { from: owner0 })
+			const test1 = await Regulated.new(regulator.address, { from: owner0 })
 			assert.strictEqual(regulator.address, await test1.getRegulator())
 		})
 
@@ -39,27 +39,27 @@ contract('Regulated', (accounts) => {
 	describe("setRegulator", () => {
 
 		it("should allow setting regulator if the current regulator", async() => {
-			assert.isTrue(await test.setRegulator(regulatorNew.address.toString(16), { from: owner0 }))
+			await regulator.delegateRegulatorRole(test.address, regulatorNew.address, { from: owner0 })
 			assert.strictEqual(await test.getRegulator(), regulatorNew.address, "Regulator was not set")
 		})
 
 		it("should not allow setting regulator if not the current regulator", async() => {
 			return expectedExceptionPromise(
-				() => test.setRegulator(regulatorNew.address.toString(16), { from: owner1, gas: 3000000 }),
+				() => test.setRegulator(regulatorNew.address, { from: owner1, gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should reject setting regulator if no changes are made", async() => {
 			return expectedExceptionPromise(
-				() => test.setRegulator(regulator.address.toString(16), { from: owner0, gas: 3000000 }),
+				() => regulator.delegateRegulatorRole(test.address, regulator.address, { from: owner0, gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should reject setting regulator to a 0 address", async() => {
 			return expectedExceptionPromise(
-				() => test.setRegulator(0x0, { from: owner0, gas: 3000000 }),
+				() => regulator.delegateRegulatorRole(test.address, 0x0, { from: owner0, gas: 3000000 }),
 				3000000
 			)
 		})
