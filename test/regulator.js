@@ -12,6 +12,7 @@
 const expectedExceptionPromise = require("../utils/expectedException")
 
 const Regulator = artifacts.require("./Regulator.sol")
+const TollBoothOperator = artifacts.require("./TollBoothOperator.sol")
 
 contract('Regulator', (accounts) => {
 
@@ -79,7 +80,7 @@ contract('Regulator', (accounts) => {
 			const test = await Regulator.new({ from: owner0 })
 			const tx = await test.createNewOperator(owner1, 100, { from: owner0 })
 			const operator = tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator
-			assert.isTrue(await operator.isPaused())
+			assert.isTrue(await TollBoothOperator.at(operator).isPaused())
 		})
 
 		it("should reject creating operators with the same owner as the regulator", async() => {
