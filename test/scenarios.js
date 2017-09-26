@@ -62,7 +62,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle1` gets no refund.
 	describe("scenario 1", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.setRoutePrice(booth1, booth2, 1000, { from: boothOwner })
 
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1000 })
@@ -80,7 +80,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle1` gets no refund.
 	describe("scenario 2", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.setRoutePrice(booth1, booth2, 1050, { from: boothOwner })
 
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1000 })
@@ -98,7 +98,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle1` gets refunded the difference.
 	describe("scenario 3", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.setRoutePrice(booth1, booth2, 100, { from: boothOwner })
 
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1000 })
@@ -116,7 +116,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle1` gets refunded the difference.
 	describe("scenario 4", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.setRoutePrice(booth1, booth2, 1000, { from: boothOwner })
 
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1010 })
@@ -135,7 +135,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle1` gets refunded the difference.
 	describe("scenario 5", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1020 })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
 
@@ -157,7 +157,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle2` gets refunded the difference.
 	describe("scenario 6", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1020 })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
 
