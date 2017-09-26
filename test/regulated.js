@@ -9,10 +9,11 @@
 const expectedExceptionPromise = require("../utils/expectedException")
 
 const Regulated = artifacts.require("./Regulated.sol")
+const Regulator = artifacts.require("./Regulator.sol")
 
 contract('Regulated', (accounts) => {
 
-	let test, owner0, owner1
+	let test, regulator, regulatorNew, owner0, owner1
 
 	before("should prepare", () => {
 		assert.isAtLeast(accounts.length, 2)
@@ -21,16 +22,16 @@ contract('Regulated', (accounts) => {
 	})
 
 	beforeEach("make new test case", async() => {
-		test = await Regulated.new(owner0, { from: owner0 })
+		regulator = await Regulator.new({ from: owner0 })
+		regulatorNew = await Regulator.new({ from: owner0 })
+		test = await Regulated.new(regulator.address, { from: owner0 })
 	})
 
 	describe("initialisation", () => {
 
 		it("should store the provided regulator address when creating", async() => {
-			const test1 = await Regulated.new(owner0, { from: owner0 })
-			const test2 = await Regulated.new(owner1, { from: owner0 })
-			assert.strictEqual(owner0, await test1.getRegulator())
-			assert.strictEqual(owner1, await test2.getRegulator())
+			const test1 = await Regulated.new(regulator.address.toString(16), { from: owner0 })
+			assert.strictEqual(regulator.address, await test1.getRegulator())
 		})
 
 	})
@@ -38,19 +39,20 @@ contract('Regulated', (accounts) => {
 	describe("setRegulator", () => {
 
 		it("should allow setting regulator if the current regulator", async() => {
-			assert.isTrue(await test.setRegulator(owner1, { from: owner0 }))
+			assert.isTrue(await test.setRegulator(regulatorNew.address.toString(16), { from: owner0 }))
+			assert.strictEqual(await test.getRegulator(), regulatorNew.address, "Regulator was not set")
 		})
 
 		it("should not allow setting regulator if not the current regulator", async() => {
 			return expectedExceptionPromise(
-				() => test.setRegulator(owner1, { from: owner1, gas: 3000000 }),
+				() => test.setRegulator(regulatorNew.address.toString(16), { from: owner1, gas: 3000000 }),
 				3000000
 			)
 		})
 
 		it("should reject setting regulator if no changes are made", async() => {
 			return expectedExceptionPromise(
-				() => test.setRegulator(owner0, { from: owner0, gas: 3000000 }),
+				() => test.setRegulator(regulator.address.toString(16), { from: owner0, gas: 3000000 }),
 				3000000
 			)
 		})
