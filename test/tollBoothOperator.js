@@ -179,6 +179,16 @@ contract('TollBoothOperator', (accounts) => {
 			assert.strictEqual((await test.getRoutePrice(booth0, booth1)).toNumber(), 6, "Route price not updated")
 		})
 
+		it("should trigger pending payments to be processed if any are present", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
+
+			const tx = await test.setRoutePrice(booth0, boothNoFee, 1, { from: boothOwner })
+
+			const refund = tx.logs.find(l => l.event === 'LogRoadExited').args.refundWeis
+			assert.strictEqual(refund.toNumber(), 1, "Refunded amount does not match expected")
+		})
+
 	})
 
 })
