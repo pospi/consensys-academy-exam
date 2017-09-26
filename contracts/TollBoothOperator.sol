@@ -24,8 +24,8 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		uint256 depositedWeis;
 	}
 
-	mapping(bytes32 => VehicleEntry) activeVehicles;
-	mapping(address => mapping(address => bytes32[])) pendingPayments;
+	mapping(bytes32 => VehicleEntry) private activeVehicles;
+	mapping(address => mapping(address => bytes32[])) private pendingPayments;
 
 	uint feesRecoverable = 0;
 
