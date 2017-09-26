@@ -155,7 +155,7 @@ contract('Scenarios', (accounts) => {
 	// `vehicle2` gets refunded the difference.
 	describe("scenario 6", () => {
 
-		it.only("succeeds", async() => {
+		it("succeeds", async() => {
 			await test.enterRoad(booth1, hash1, { from: vehicle1, value: 1020 })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
 			await test.enterRoad(booth1, hash2, { from: vehicle2, value: 2000 })
