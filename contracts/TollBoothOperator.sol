@@ -27,9 +27,12 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	mapping(bytes32 => VehicleEntry) activeVehicles;
 
 	function TollBoothOperator(bool paused, uint depositWei, address regulator)
-		Pausable(paused)
+		TollBoothHolder()
 		DepositHolder(depositWei)
+		MultiplierHolder()
+		RoutePriceHolder()
 		Regulated(regulator)
+		Pausable(paused)
 	{}
 
 	/**
