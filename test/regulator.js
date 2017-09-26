@@ -78,7 +78,7 @@ contract('Regulator', (accounts) => {
 		it("should create new operators which start initially paused", async() => {
 			const test = await Regulator.new({ from: owner0 })
 			const operator = await test.createNewOperator(owner1, 100, { from: owner0 })
-			assert.isTrue(operator.isPaused())
+			assert.isTrue(await operator.isPaused())
 		})
 
 		it("should reject creating operators with the same owner as the regulator", async() => {
