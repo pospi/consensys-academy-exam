@@ -87,7 +87,7 @@ contract TollBoothHolder is TollBoothHolderI, Owned
 		returns(bool success)
 	{
 		require(tollBooth != 0x0);
-		require(tollBooths[tollBooth] == false);
+		require(tollBooths[tollBooth] == true);
 
 		delete tollBooths[tollBooth];
 
