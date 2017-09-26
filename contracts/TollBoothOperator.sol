@@ -179,7 +179,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		require(vehicle != 0x0);
 		require(msg.sender != entryBooth);
 
-		return handleVehicleExit(hashed, false);
+		return handleVehicleExit(hashed, msg.sender, false);
 	}
 
 	/**
@@ -224,7 +224,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		require(isTollBooth(entryBooth) && isTollBooth(exitBooth));
 
 		for (uint i = 0; i < count; ++i) {
-			handleVehicleExit(pendingPayments[entryBooth][exitBooth][i], true);
+			handleVehicleExit(pendingPayments[entryBooth][exitBooth][i], exitBooth, true);
 		}
 
 		return true;
@@ -309,19 +309,19 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	 * @param  skipPendingHandling if true, don't run "pending" processing (use when running to clear pending payments)
 	 * @return 1 if vehicle exited, 2 if vehicle is now pending final payment
 	 */
-	function handleVehicleExit(bytes32 exitSecretHashed, bool skipPendingHandling)
+	function handleVehicleExit(bytes32 exitSecretHashed, address exitBooth, bool skipPendingHandling)
 		private
 		returns(uint status)
 	{
 		address vehicle = activeVehicles[exitSecretHashed].vehicle;
 		address entryBooth = activeVehicles[exitSecretHashed].entryBooth;
 
-		uint basePrice = getRoutePrice(entryBooth, msg.sender);
+		uint basePrice = getRoutePrice(entryBooth, exitBooth);
 
 		// if no route price, we can't do anything yet. Payment remains and gets logged "pending".
 		if (!skipPendingHandling && basePrice == 0) {
-			pendingPayments[entryBooth][msg.sender].push(exitSecretHashed);
-			LogPendingPayment(exitSecretHashed, entryBooth, msg.sender);
+			pendingPayments[entryBooth][exitBooth].push(exitSecretHashed);
+			LogPendingPayment(exitSecretHashed, entryBooth, exitBooth);
 			return 2;
 		}
 
@@ -333,7 +333,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		delete activeVehicles[exitSecretHashed];
 
 		// log an event
-		LogRoadExited(msg.sender, exitSecretHashed, fee, refund);
+		LogRoadExited(exitBooth, exitSecretHashed, fee, refund);
 
 		// track what is payable to owner
 		feesRecoverable += fee;
