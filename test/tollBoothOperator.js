@@ -16,13 +16,13 @@ contract('TollBoothOperator', (accounts) => {
 
 	let test,
 		booth0, booth1, boothNoFee, boothOwner,
-		owner0, owner1, owner2, vehicle0, vehicle1,
+		owner1, owner2, vehicle0, vehicle1, vehicle2,
 		regulator0, regulatorOwner0,
 		hash0, hash1, hash2
 
 	before("should prepare", () => {
 		assert.isAtLeast(accounts.length, 10)
-		owner0 = accounts[0]
+		vehicle2 = accounts[0]
 		owner1 = accounts[1]
 		owner2 = accounts[4]
 		vehicle0 = accounts[2]
@@ -38,6 +38,7 @@ contract('TollBoothOperator', (accounts) => {
 		regulator0 = await Regulator.new({ from: regulatorOwner0 })
 		await regulator0.setVehicleType(vehicle0, 1, { from: regulatorOwner0 })
 		await regulator0.setVehicleType(vehicle1, 2, { from: regulatorOwner0 })
+		await regulator0.setVehicleType(vehicle2, 3, { from: regulatorOwner0 })
 
 		const tx = await regulator0.createNewOperator(boothOwner, 10, { from: regulatorOwner0 })
 		test = await TollBoothOperator.at(tx.logs.find(l => l.event === 'LogTollBoothOperatorCreated').args.newOperator)
@@ -51,7 +52,7 @@ contract('TollBoothOperator', (accounts) => {
 
 		hash0 = await test.hashSecret(web3.fromAscii("helo"))
 		hash1 = await test.hashSecret(web3.fromAscii("YOULOSTTHEGAME"))
-		hash2 = await test.hashSecret(web3.fromAscii("helo"))
+		hash2 = await test.hashSecret(web3.fromAscii("ILIEKMUDKIPS"))
 	})
 
 	describe("enterRoad", () => {
@@ -171,6 +172,85 @@ contract('TollBoothOperator', (accounts) => {
 
 	})
 
+	describe("clearSomePendingPayments", () => {
+
+		beforeEach(async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
+			await test.enterRoad(booth0, hash2, { from: vehicle1, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("ILIEKMUDKIPS"), { from: boothNoFee })
+			await test.enterRoad(booth0, hash0, { from: vehicle2, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("helo"), { from: boothNoFee })
+
+			await test.setRoutePrice(booth0, boothNoFee, 3, { from: boothOwner })
+		})
+
+		it("should clear a pending payment", async() => {
+			await test.clearSomePendingPayments(booth0, boothNoFee, 1, { from: boothOwner })
+			assert.strictEqual((await test.getPendingPaymentCount(booth0, boothNoFee)).toNumber(), 1)
+		})
+
+		it("should clear multiple pending payments", async() => {
+			await test.clearSomePendingPayments(booth0, boothNoFee, 2, { from: boothOwner })
+			assert.strictEqual((await test.getPendingPaymentCount(booth0, boothNoFee)).toNumber(), 0)
+		})
+
+		it("should not allow clearing payments when paused", async() => {
+			test.setPaused(true, { from: boothOwner })
+			return expectedExceptionPromise(
+				() => test.clearSomePendingPayments(booth0, boothNoFee, 1, { from: boothOwner, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		it("should abort clearing payments if fewer to clear than specified", async() => {
+			return expectedExceptionPromise(
+				() => test.clearSomePendingPayments(booth0, boothNoFee, 10, { from: boothOwner, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		it("should abort clearing payments if number to clear is 0", async() => {
+			return expectedExceptionPromise(
+				() => test.clearSomePendingPayments(booth0, boothNoFee, 0, { from: boothOwner, gas: 3000000 }),
+				3000000
+			)
+		})
+
+	})
+
+	describe("withdrawCollectedFees", () => {
+
+		it("should allow withdrawal of fees to owner", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
+			assert.strictEqual((await test.getCollectedFeesAmount()).toNumber(), 2, "Incorrect amount retained")
+			await test.withdrawCollectedFees({ from: boothOwner })
+			assert.strictEqual((await test.getCollectedFeesAmount()).toNumber(), 0, "Incorrect amount paid out")
+		})
+
+		it("should deny withdrawls to anyone other than the contract owner", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
+			return expectedExceptionPromise(
+				() => test.withdrawCollectedFees({ from: owner1, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		it("should abort payment withdrawal if no fees have been collected", async() => {
+			return expectedExceptionPromise(
+				() => test.withdrawCollectedFees({ from: boothOwner, gas: 3000000 }),
+				3000000
+			)
+		})
+
+		// it("should abort payment withdrawal if owner does not receive funds", async() => {
+			// :TODO: how to test this? Fake stack depth to make `send` fail?
+		// })
+
+	})
+
 	describe("setRoutePrice", () => {
 
 		it("should allow setting route price even if paused", async() => {
@@ -183,10 +263,10 @@ contract('TollBoothOperator', (accounts) => {
 			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
 
-			const tx = await test.setRoutePrice(booth0, boothNoFee, 1, { from: boothOwner })
+			const tx = await test.setRoutePrice(booth0, boothNoFee, web3.toWei(1, 'ether') - 100, { from: boothOwner })
 
 			const refund = tx.logs.find(l => l.event === 'LogRoadExited').args.refundWeis
-			assert.strictEqual(refund.toNumber(), 1, "Refunded amount does not match expected")
+			assert.strictEqual(refund.toNumber(), 100, "Refunded amount does not match expected")
 		})
 
 	})
