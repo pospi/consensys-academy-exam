@@ -306,10 +306,10 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 	 * Internal methodr to process vehicle exits
 	 *
 	 * @param  exitSecretHashed    vehicle's exit nonce hash
-	 * @param  skipPendingHandling if true, don't run "pending" processing (use when running to clear pending payments)
+	 * @param  isPending           if true, don't run "pending" processing (use when running to clear pending payments)
 	 * @return 1 if vehicle exited, 2 if vehicle is now pending final payment
 	 */
-	function handleVehicleExit(bytes32 exitSecretHashed, address exitBooth, bool skipPendingHandling)
+	function handleVehicleExit(bytes32 exitSecretHashed, address exitBooth, bool isPending)
 		private
 		returns(uint status)
 	{
@@ -319,7 +319,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		uint basePrice = getRoutePrice(entryBooth, exitBooth);
 
 		// if no route price, we can't do anything yet. Payment remains and gets logged "pending".
-		if (!skipPendingHandling && basePrice == 0) {
+		if (!isPending && basePrice == 0) {
 			pendingPayments[entryBooth][exitBooth].push(exitSecretHashed);
 			LogPendingPayment(exitSecretHashed, entryBooth, exitBooth);
 			return 2;
@@ -331,6 +331,10 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 
 		// exit the road
 		delete activeVehicles[exitSecretHashed];
+		if (isPending) {
+			delete pendingPayments[entryBooth][exitBooth][pendingPayments[entryBooth][exitBooth].length - 1];
+			pendingPayments[entryBooth][exitBooth].length -= 1;
+		}
 
 		// log an event
 		LogRoadExited(exitBooth, exitSecretHashed, fee, refund);
