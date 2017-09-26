@@ -33,6 +33,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		RoutePriceHolder()
 		Regulated(regulator)
 		Pausable(paused)
+		Owned()
 	{}
 
 	/**
