@@ -9,6 +9,7 @@ pragma solidity 0.4.15;
 
 // import "https://github.com/o0ragman0o/LibCLL/LibCLL.sol";	// circular linked list for efficient indexing of operators
 import "./interfaces/RegulatorI.sol";
+import "./interfaces/RegulatedI.sol";
 import "./TollBoothOperator.sol";
 import "./Owned.sol";
 
@@ -161,5 +162,21 @@ contract Regulator is RegulatorI, Owned
 		returns(bool indeed)
 	{
 		return approvedOperators[operator];
+	}
+
+	/**
+	 * Update a `Regulated` to change the regulator on it.
+	 * This function is required for external accounts to be able to run this action on behalf of the Regulator.
+	 *
+	 * @param target contract to update regulator on
+	 * @param newRegulator contract to transfer regulator status to
+	 * @return true on success
+	 */
+	function delegateRegulatorRole(RegulatedI target, RegulatorI newRegulator)
+		fromOwner()
+		public
+		returns(bool success)
+	{
+		return target.setRegulator(address(newRegulator));
 	}
 }
