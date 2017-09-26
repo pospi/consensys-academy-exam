@@ -10,11 +10,11 @@ import "./interfaces/RegulatedI.sol";
 
 contract Regulated is RegulatedI
 {
-	address regulator;
+	RegulatorI myRegulator;
 
 	function Regulated(address initialRegulator) {
 		require(initialRegulator != 0);
-		regulator = initialRegulator;
+		myRegulator = RegulatorI(initialRegulator);
 	}
 
 	/**
@@ -40,11 +40,11 @@ contract Regulated is RegulatedI
 		public
 		returns(bool success)
 	{
-		require(regulator == msg.sender);
+		require(address(myRegulator) == msg.sender);
 		require(newRegulator != 0x0);
-		require(newRegulator != regulator);
+		require(newRegulator != address(myRegulator));
 
-		regulator = newRegulator;
+		myRegulator = RegulatorI(newRegulator);
 
 		LogRegulatorSet(msg.sender, newRegulator);
 
@@ -59,6 +59,6 @@ contract Regulated is RegulatedI
 		public
 		returns(RegulatorI regulator)
 	{
-		return regulator;
+		return myRegulator;
 	}
 }
