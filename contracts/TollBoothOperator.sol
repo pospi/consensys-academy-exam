@@ -83,6 +83,7 @@ contract TollBoothOperator is TollBoothOperatorI, TollBoothHolder, DepositHolder
 		returns (bool success)
 	{
 		require(isTollBooth(entryBooth));
+		require(getRegulator().getVehicleType(msg.sender) != 0);
 		require(msg.value >= getDeposit() * getMultiplier(getRegulator().getVehicleType(msg.sender)));
 
 		activeVehicles[exitSecretHashed] = VehicleEntry({
