@@ -15,13 +15,13 @@ const TollBoothOperator = artifacts.require("./TollBoothOperator.sol")
 contract('TollBoothOperator', (accounts) => {
 
 	let test,
-		booth0, booth1, boothOwner,
+		booth0, booth1, boothNoFee, boothOwner,
 		owner0, owner1, owner2, vehicle0, vehicle1,
 		regulator0, regulatorOwner0,
 		hash0, hash1, hash2
 
 	before("should prepare", () => {
-		assert.isAtLeast(accounts.length, 9)
+		assert.isAtLeast(accounts.length, 10)
 		owner0 = accounts[0]
 		owner1 = accounts[1]
 		owner2 = accounts[4]
@@ -30,6 +30,7 @@ contract('TollBoothOperator', (accounts) => {
 		regulatorOwner0 = accounts[5]
 		booth0 = accounts[6]
 		booth1 = accounts[7]
+		boothNoFee = accounts[9]
 		boothOwner = accounts[8]
 	})
 
@@ -45,6 +46,7 @@ contract('TollBoothOperator', (accounts) => {
 		await test.setMultiplier(2, 3, { from: boothOwner })
 		await test.addTollBooth(booth0, { from: boothOwner })
 		await test.addTollBooth(booth1, { from: boothOwner })
+		await test.addTollBooth(boothNoFee, { from: boothOwner })
 		await test.setRoutePrice(booth0, booth1, 2, { from: boothOwner })
 
 		hash0 = await test.hashSecret(web3.fromAscii("helo"))
@@ -101,7 +103,19 @@ contract('TollBoothOperator', (accounts) => {
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
 		})
 
-		it.only("should clear vehicle visit data when exiting the road", async() => {
+		it("should handle vehicles exiting the road via a route with known price", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			const status = await test.reportExitRoad.call(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
+			assert.strictEqual(status.toNumber(), 1)
+		})
+
+		it("should handle vehicles exiting the road via a route with unknown price", async() => {
+			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
+			const status = await test.reportExitRoad.call(web3.fromAscii("YOULOSTTHEGAME"), { from: boothNoFee })
+			assert.strictEqual(status.toNumber(), 2)
+		})
+
+		it("should clear vehicle visit data when exiting the road", async() => {
 			await test.enterRoad(booth0, hash1, { from: vehicle0, value: web3.toWei(1, 'ether') })
 			await test.reportExitRoad(web3.fromAscii("YOULOSTTHEGAME"), { from: booth1 })
 
