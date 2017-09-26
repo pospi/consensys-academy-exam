@@ -143,9 +143,8 @@ contract Regulator is RegulatorI, Owned
 		returns(bool success)
 	{
 		require(isOperator(operator));
-		require(approvedOperators[operator]);
 
-		delete approvedOperators[operator];
+		approvedOperators[operator] = false;
 
 		LogTollBoothOperatorRemoved(msg.sender, operator);
 
