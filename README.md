@@ -21,7 +21,8 @@
 
 ## Running
 
-- `npm run test` to run test suite
+- `npm run test` to run test suite along with testrpc
+- `npm run test:contracts` to run the tests standalone if you already have a chain running
 - `npm run test:watch` to run tests in watch mode for development
 
 
