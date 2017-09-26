@@ -98,12 +98,6 @@ contract('RoutePriceHolder', (accounts) => {
 			)
 		})
 
-		it("should allow setting route price even if paused", async() => {
-			await Promise.all([test.addTollBooth(booth0), test.addTollBooth(booth1)])
-			test.setPaused(true)
-			assert.isTrue(await test.setRoutePrice(booth0, booth1, 43, { from: owner0 }))
-		})
-
 	})
 
 })

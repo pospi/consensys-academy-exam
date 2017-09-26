@@ -74,4 +74,13 @@ contract('TollBoothOperator', (accounts) => {
 
 	})
 
+	describe("setRoutePrice", () => {
+
+		it("should allow setting route price even if paused", async() => {
+			await test.setPaused(true, { from: owner0 })
+			assert.isTrue(await test.setRoutePrice(booth0, booth1, 6, { from: owner0 }))
+		})
+
+	})
+
 })
