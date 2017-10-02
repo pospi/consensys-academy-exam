@@ -7,7 +7,7 @@
  * @author:	pospi <sam.pospi@consensys.net>
  * @since:	 2017-09-24
  */
-pragma solidity 0.4.15;
+pragma solidity 0.4.13;
 
 import "./interfaces/MultiplierHolderI.sol";
 import "./Owned.sol";

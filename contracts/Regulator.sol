@@ -5,7 +5,7 @@
  * @author:  pospi <sam.pospi@consensys.net>
  * @since:   2017-09-24
  */
-pragma solidity 0.4.15;
+pragma solidity 0.4.13;
 
 // import "https://github.com/o0ragman0o/LibCLL/LibCLL.sol";	// circular linked list for efficient indexing of operators
 import "./interfaces/RegulatorI.sol";
